@@ -2,7 +2,7 @@
 <html lang="ru">
 <head>
   <meta charset="UTF-8">
-  <title>RD Tool Telegram Mini App - Full Mechanics</title>
+  <title>RD Tool Telegram Mini App</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <style>
@@ -209,7 +209,6 @@
       font-size: 12px;
     }
 
-    /* Технические служебные элементы, необходимые скрипту, но скрытые от глаз */
     #canvas_aspect_icon, .draw_seeds_icon, example_n, debug, #help_button, #fullscreen {
       display: none !important;
     }
@@ -218,7 +217,6 @@
 <body>
 
   <div class="app-container">
-    <!-- Холст и основные кнопки управления -->
     <div id="canvas_ui_column">
       <canvas id="canvas"></canvas>
       <div id="canvas_aspect_icon"></div>
@@ -236,7 +234,6 @@
       </div>
     </div>
 
-    <!-- Карта узоров и селекторы морфогенеза -->
     <div id="map_ui_column">
       <h3 style="margin: 5px 0 8px 0; font-size: 15px;">Узоры <kf style="font-size:12px; font-weight:normal; opacity:0.7; margin-left: 10px;"></kf></h3>
       <div id="pattern_map">
@@ -252,7 +249,6 @@
       </div>
     </div>
 
-    <!-- Цветовые палитры и пак ползунков цвета -->
     <details open>
       <summary>▼ Цвета (Color Maps)</summary>
       <div class="icon-grid">
@@ -283,7 +279,6 @@
       </div>
     </details>
 
-    <!-- Масштаб и скорость -->
     <details open>
       <summary>▼ Масштаб и Скорость (Scale & Speed)</summary>
       <div class="slider" id="scale_all"><div class="slider_text">Scale</div><div class="slider_track"><div class="slider_zero_tick"></div></div><div class="slider_thumb"></div></div>
@@ -293,7 +288,6 @@
       <div class="slider" id="speed"><div class="slider_text">Speed</div><div class="slider_track"><div class="slider_zero_tick"></div></div><div class="slider_thumb"></div></div>
     </details>
 
-    <!-- Потоки (Flow) -->
     <details>
       <summary>▼ Потоки (Flow)</summary>
       <div class="slider" id="flow_radial"><div class="slider_text">Flow Radial</div><div class="slider_track"><div class="slider_zero_tick"></div></div><div class="slider_thumb"></div></div>
@@ -305,7 +299,6 @@
       <div class="slider" id="flow_vert"><div class="slider_text">Flow Vertical</div><div class="slider_track"><div class="slider_zero_tick"></div></div><div class="slider_thumb"></div></div>
     </details>
 
-    <!-- Ориентация (Orientation) -->
     <details id="orientation">
       <summary>▼ Ориентация (Orientation)</summary>
       <div class="slider" id="orientation_radial"><div class="slider_text">Orientation Radial</div><div class="slider_track"><div class="slider_zero_tick"></div></div><div class="slider_thumb"></div></div>
@@ -316,7 +309,6 @@
     </details>
   </div>
 
-  <!-- Скрытые элементы, нужные для корректной работы JavaScript-логики -->
   <div style="display:none;"><button id="help_button"></button><button id="fullscreen"></button><debug></debug></div>
 
   <script>
@@ -327,4 +319,17 @@
       printErr: function(text) { console.error(text); },
       setStatus: function(text) { if(statusElement) statusElement.innerHTML = text; },
       onRuntimeInitialized: function() {
-        console.
+        console.log("WASM Runtime initialized successfully.");
+        if (typeof init === "function") {
+          init();
+        }
+      }
+    };
+  </script>
+
+  <!-- Строгий порядок подключения: сначала скрипт интерфейса, затем движок -->
+  <script src="rdtool2.js"></script>
+  <script src="rdtool-ems.js"></script>
+
+</body>
+</html>
