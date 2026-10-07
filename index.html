@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <title>RD Tool Telegram Full</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <style>
+    :root {
+      --bg-color: var(--tg-theme-bg-color, #2b2b2b);
+      --text-color: var(--tg-theme-text-color, #ffffff);
+      --button-bg: var(--tg-theme-button-color, #444444);
+      --accent-color: var(--tg-theme-link-color, #00a8ff);
+    }
+    body {
+      background-color: var(--bg-color); color: var(--text-color); font-family: sans-serif;
+      margin: 0; padding: 10px; overflow-x: hidden;
+    }
+    #canvas_ui_column, #map_ui_column { display: flex; flex-direction: column; width: 100%; position: relative; }
+    canvas {
+      width: 100%; aspect-ratio: 16/9; background-color: #000; border-radius: 8px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.5); touch-action: none; margin-bottom: 15px;
+    }
+    .toolbar { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 15px; }
+    .text_button {
+      flex: 1 1 calc(33% - 5px); background: var(--button-bg); color: #fff;
+      border: 1px solid #555; padding: 10px; border-radius: 6px; font-size: 13px; cursor: pointer;
+    }
+    .text_button:active, .pause_paused { background: var(--accent-color); }
+    #pattern_map {
+      width: 100%; aspect-ratio: 1; background-image: url("https://karlsims.com/rdtool-images/rd-pattern-map.png");
+      background-size: cover; position: relative; border-radius: 8px; margin-bottom: 10px; touch-action: none;
+    }
+    #pattern_ring1, #pattern_ring2 {
+      position: absolute; border: 3px solid var(--accent-color); border-radius: 50%;
+      width: 8%; height: 8%; transform: translate(-50%, -50%);
+    }
+    #pattern_ring2 { border-color: #ffb142; visibility: hidden; }
+    .icon-grid { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 10px; }
+    .cm_button, .kf_button {
+      width: 40px; height: 40px; border: 2px solid transparent; border-radius: 6px; background-size: cover; cursor: pointer;
+    }
+    .cm_button_selected, .kf_button_selected { border-color: var(--accent-color); box-shadow: 0 0 8px var(--accent-color); }
+    .checkbox { background: var(--button-bg); color: #fff; border: 1px solid #555; padding: 6px 12px; border-radius: 4px; display: inline-block; cursor: pointer; }
+    .checkbox_checked { background: var(--accent-color); border-color: var(--accent-color); }
+    details { background: rgba(0,0,0,0.2); padding: 10px; border-radius: 8px; margin-bottom: 10px; border: 1px solid #444; }
+    summary { font-weight: bold; cursor: pointer; margin-bottom: 10px; outline: none; }
+    .slider { position: relative; height: 35px; width: 100%; margin-bottom: 8px; touch-action: none; cursor: pointer; }
+    .slider_text { position: absolute; left: 0; top: -5px; font-size: 11px; pointer-events: none; opacity: 0.8;}
+    .slider_track { position: absolute; top: 15px; width: 100%; height: 6px; background: rgba(255,255,255,0.1); border-radius: 3px; pointer-events: none;}
+    .slider_zero_tick { position: absolute; left: 50%; width: 2px; height: 100%; background: rgba(255,255,255,0.3); pointer-events: none;}
+    .slider_thumb { position: absolute; top: 10px; left: 48.5%; width: 16px; height: 16px; background: var(--accent-color); border-radius: 50%; pointer-events: none;}
+    #canvas_aspect_icon, .draw_seeds_icon, example_n, debug, #help_button, #fullscreen { display: none !important; }
+  </style>
+</head>
+<body>
+
+  <div id="canvas_ui_column">
+    <canvas id="canvas"></canvas>
+    <div id="canvas_aspect_icon"></div>
+    <div id="status" style="position:absolute; left:10px; top:10px; color:#aaa; font-size: 12px;"></div>
+    <div id="draw_seeds_icon" class="draw_seeds_icon"></div>
+    <fps style="text-align:center; color: var(--accent-color); font-weight:bold; margin-bottom: 10px;">fps: --</fps>
+
+    <div class="toolbar" id="buttons_ui_container">
+      <button id="pause" class="text_button">Pause</button>
+      <button id="clear" class="text_button">Clear</button>
+      <button id="regrow" class="text_button">Regrow</button>
+      <button id="reset" class="text_button">Reset</button>
+      <button id="example" class="text_button">Example</button>
+      <example_n id="example_n"></example_n>
+    </div>
+  </div>
+
+  <div id="map_ui_column">
+    <h3 style="margin: 5px 0;">Узоры <kf style="font-size:12px; font-weight:normal; opacity:0.7; margin-left: 10px;"></kf></h3>
+    <div id="pattern_map">
+      <div id="pattern_ring1"></div>
+      <div id="pattern_ring2"></div>
+    </div>
+    <div class="icon-grid">
+      <button id="kf_radial" class="kf_button" style="background-image:url(https://karlsims.com/rdtool-images/kf-radial.png);"></button>
+      <button id="kf_random" class="kf_button" style="background-image:url(https://karlsims.com/rdtool-images/kf-random.png);"></button>
+      <button id="kf_ring" class="kf_button" style="background-image:url(https://karlsims.com/rdtool-images/kf-ring.png);"></button>
+      <button id="kf_horiz" class="kf_button" style="background-image:url(https://karlsims.com/rdtool-images/kf-horiz.png);"></button>
+      <button id="kf_vert" class="kf_button" style="background-image:url(https://karlsims.com/rdtool-images/kf-vert.png);"></button>
+    </div>
+  </div>
+
+  <details open>
+    <summary>▼ Цвета (Color Maps)</summary>
+    <div class="icon-grid">
+      <button id="cm0" class="cm_button cm_button_selected" style="background-image:url(https://karlsims.com/rdtool-images/cm0.png);"></button>
+      <button id="cm1" class="cm_button" style="background-image:url(https://karlsims.com/rdtool-images/cm1.png);"></button>
+      <button id="cm2" class="cm_button" style="background-image:url(https://karlsims.com/rdtool-images/cm2.png);"></button>
+      <button id="cm3" class="cm_button" style="background-image:url(https://karlsims.com/rdtool-images/cm3.png);"></button>
+      <button id="cm4" class="cm_button" style="background-image:url(https://karlsims.com/rdtool-images/cm4.png);"></button>
+      <button id="cm5" class="cm_button" style="background-image:url(https://karlsims.com/rdtool-images/cm5.png);"></button>
+      <button id="cm6" class="cm_button" style="background-image:url(https://karlsims.com/rdtool-images/cm6.png);"></button>
+      <button id="cm7" class="cm_button" style="background-image:url(https://karlsims.com/rdtool-images/cm7.png);"></button>
+      <button id="cm8" class="cm_button" style="background-image:url(https://karlsims.com/rdtool-images/cm8.png);"></button>
+      <button id="cm9" class="cm_button" style="background-image:url(https://karlsims.com/rdtool-images/cm9.png);"></button>
+      <button id="cm10" class="cm_button" style="background-image:url(https://karlsims.com/rdtool-images/cm10.png);"></button>
+      <button id="cm11" class="cm_button" style="background-image:url(https://karlsims.com/rdtool-images/cm11.png);"></button>
+    </div>
+    <div style="margin-top: 10px;">
+      <button id="emboss" class="checkbox checkbox_checked"><div class="checkbox_text">Emboss</div></button>
+      <button id="invert" class="checkbox"><div class="checkbox_text">Invert</div></button>
+    </div>
+    <div style="margin-top: 15px;" id="adjust_colors">
+      <div class="slider" id="hue"><div class="slider_text">Hue</div><div class="slider_track"><div class="slider_zero_tick"></div></div><div class="slider_thumb"></div></div>
+      <div class="slider" id="saturation"><div class="slider_text">Saturation</div><div class="slider_track"><div class="slider_zero_tick"></div></div><div class="slider_thumb"></div></div>
+      <div class="slider" id="brightness"><div class="slider_text">Brightness</div><div class="slider_track"><div class="slider_zero_tick"></div></div><div class="slider_thumb"></div></div>
+      <div class="slider" id="contrast"><div class="slider_text">Contrast</div><div class="slider_track"><div class="slider_zero_tick"></div></div><div class="slider_thumb"></div></div>
+      <div class="slider" id="color_freq"><div class="slider_text">Frequency</div><div class="slider_track"><div class="slider_zero_tick"></div></div><div class="slider_thumb"></div></div>
+      <div class="slider" id="color_phase"><div class="slider_text">Phase</div><div class="slider_track"><div class="slider_zero_tick"></div></div><div class="slider_thumb"></div></div>
+    </div>
+  </details>
+
+  <details open>
+    <summary>▼ Масштаб и Скорость (Scale & Speed)</summary>
+    <div class="slider" id="scale_all"><div class="slider_text">Scale</div><div class="slider_track"><div class="slider_zero_tick"></div></div><div class="slider_thumb"></div></div>
+    <div class="slider" id="scale_radial"><div class="slider_text">Scale Radial</div><div class="slider_track"><div class="slider_zero_tick"></div></div><div class="slider_thumb"></div></div>
+    <div class="slider" id="scale_random"><div class="slider_text">Scale Random</div><div class="slider_track"><div class="slider_zero_tick"></div></div><div class="slider_thumb"></div></div>
+    <div class="slider" id="scale_ring"><div class="slider_text">Scale Ring</div><div class="slider_track"><div class="slider_zero_tick"></div></div><div class="slider_thumb"></div></div>
+    <div class="slider" id="speed"><div class="slider_text">Speed</div><div class="slider_track"><div class="slider_zero_tick"></div></div><div class="slider_thumb"></div></div>
+  </details>
+
+  <details>
+    <summary>▼ Потоки (Flow)</summary>
+    <div class="slider" id="flow_radial"><div class="slider_text">Flow Radial</div><div class="slider_track"><div class="slider_zero_tick"></div></div><div class="slider_thumb"></div></div>
+    <div class="slider" id="flow_rotate"><div class="slider_text">Flow Rotate</div><div class="slider_track"><div class="slider_zero_tick"></div></div><div class="slider_thumb"></div></div>
+    <div class="slider" id="flow_swirl"><div class="slider_text">Flow Swirl</div><div class="slider_track"><div class="slider_zero_tick"></div></div><div class="slider_thumb"></div></div>
+    <div class="slider" id="flow_bubble"><div class="slider_text">Flow Bubble</div><div class="slider_track"><div class="slider_zero_tick"></div></div><div class="slider_thumb"></div></div>
+    <div class="slider" id="flow_ring"><div class="slider_text">Flow Ring</div><div class="slider_track"><div class="slider_zero_tick"></div></div><div class="slider_thumb"></div></div>
+    <div class="slider" id="flow_vortex"><div class="slider_text">Flow Vortex</div><div class="slider_track"><div class="slider_zero_tick"></div></div><div class="slider_thumb"></div></div>
+    <div class="slider" id="flow_vert"><div class="slider_text">Flow Vertical</div><div class="slider_track"><div class="slider_zero_tick"></div></div><div class="slider_thumb"></div></div>
+  </details>
+
+  <details id="orientation">
+    <summary>▼ Ориентация (Orientation)</summary>
+    <div class="slider" id="orientation_radial"><div class="slider_text">Orientation Radial</div><div class="slider_track"><div class="slider_zero_tick"></div></div><div class="slider_thumb"></div></div>
+    <div class="slider" id="orientation_circles"><div class="slider_text">Orientation Circles</div><div class="slider_track"><div class="slider_zero_tick"></div></div><div class="slider_thumb"></div></div>
+    <div class="slider" id="orientation_swirl"><div class="slider_text">Orientation Swirl</div><div class="slider_track"><div class="slider_zero_tick"></div></div><div class="slider_thumb"></div></div>
+    <div class="slider" id="orientation_bubble"><div class="slider_text">Orientation Bubble</div><div class="slider_track"><div class="slider_zero_tick"></div></div><div class="slider_thumb"></div></div>
+    <div class="slider" id="orientation_vert"><div class="slider_text">Orientation Linear</div><div class="slider_track"><div class="slider_zero_tick"></div></div><div class="slider_thumb"></div></div>
+  </details>
+
+  <div style="display:none;"><button id="help_button"></button><button id="fullscreen"></button><debug></debug></div>
+
+  <script>
+    window.Telegram.WebApp.expand();
+    var statusElement = document.getElementById('status');
+    var Module = {
+      print: function(text) { console.log(text); },
+      printErr: function(text) { console.error(text); },
+      setStatus: function(text) { if(statusElement) statusElement.innerHTML = text; },
+      onRuntimeInitialized: function() {
+        console.log("WASM Runtime initialized successfully.");
+        if (typeof init === "function") {
+          init();
+        }
+      }
+    };
+  </script>
+
+  <!-- Подключаем скрипты с правильными именами -->
+  <script src="rdtool2.js"></script>
+  <script src="rdtool-ems.js"></script>
+
+</body>
+</html>
+```[cite: 10]
+
+---
+
+### Шаг 3. Инструкция по запуску без ошибки 404
+
+1. Убедись, что файлы называются ровно так: `index.html`, `rdtool2.js`, `rdtool-ems.js` и `rdtool-ems.wasm`[cite: 10, 11, 12, 13]. Все они должны лежать в **одной папки**.
+2. Запусти локальный сервер (например, через расширение **Live Server** в VS Code или команду `python -m http.server 8000` в терминале).
+3. Переййди в браузере по адресу `http://localhost:8000/` (теперь сервер автоматически подхватит файл `index.html`, и ошибка 404 исчезнет).
+
+Попробуй выполнить эти шаги, и проект сразу заработает! Если что-то пойдет не так, сразу пиши мне.
