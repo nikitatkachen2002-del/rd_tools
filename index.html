@@ -2,11 +2,10 @@
 <html lang="ru">
 <head>
   <meta charset="UTF-8">
-  <title>RD Tool Telegram Mini App - Audio Pro</title>
+  <title>RD Tool Telegram Mini App - Ultimate Edition</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <style>
-    /* Базовая тема */
     :root {
       --bg-color: var(--tg-theme-bg-color, #1a1a1a);
       --text-color: var(--tg-theme-text-color, #ffffff);
@@ -29,7 +28,6 @@
       width: 100vw;
     }
 
-    /* Адаптивный главный контейнер */
     .app-container {
       width: 100%;
       max-width: 600px;
@@ -45,7 +43,6 @@
       position: relative;
     }
 
-    /* Холст симуляции */
     canvas {
       width: 100%;
       aspect-ratio: 16/9;
@@ -65,7 +62,6 @@
       margin-bottom: 8px;
     }
 
-    /* Панель кнопок */
     .toolbar {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
@@ -100,7 +96,6 @@
       font-size: 14px;
     }
 
-    /* Аккордеоны настроек */
     details {
       background: rgba(255,255,255,0.05);
       padding: 12px;
@@ -119,7 +114,6 @@
       color: var(--accent-color);
     }
 
-    /* Карта узоров */
     #pattern_map {
       width: 100%;
       aspect-ratio: 1;
@@ -143,7 +137,6 @@
     }
     #pattern_ring2 { border-color: #ffb142; visibility: hidden; }
 
-    /* Сетка иконок */
     .icon-grid {
       display: grid;
       grid-template-columns: repeat(6, 1fr);
@@ -165,7 +158,6 @@
       box-shadow: 0 0 8px var(--accent-color);
     }
 
-    /* Чекбоксы */
     .checkbox-group {
       display: flex;
       gap: 8px;
@@ -187,7 +179,6 @@
       border-color: var(--accent-color);
     }
 
-    /* Системные ползунки rdtool2.js */
     .slider {
       position: relative;
       height: 40px;
@@ -213,7 +204,6 @@
       box-shadow: 0 2px 4px rgba(0,0,0,0.5);
     }
 
-    /* Стили для новых аудио-ползунков */
     .audio-slider-container { margin-top: 10px; }
     .audio-slider-label { font-size: 12px; margin-bottom: 4px; display: flex; justify-content: space-between; }
     input[type=range] {
@@ -237,17 +227,15 @@
       border-radius: 3px;
     }
 
-    /* Технические элементы */
     .tech-layer {
       position: absolute; left: -9999px; top: -9999px; opacity: 0; pointer-events: none;
     }
 
-    /* ========================================= */
-    /* ЖЕСТКИЙ ПОЛНОЭКРАННЫЙ РЕЖИМ (ФИКС)        */
-    /* ========================================= */
+    /* Настоящий полноэкранный режим на весь экран без сжатий */
     body.is-fullscreen {
       overflow: hidden !important;
       background: #000 !important;
+      padding: 0 !important;
     }
     
     body.is-fullscreen canvas {
@@ -256,23 +244,18 @@
       left: 0 !important;
       width: 100vw !important;
       height: 100vh !important;
+      max-width: none !important;
+      max-height: none !important;
       z-index: 99998 !important;
       background: #000 !important;
       border-radius: 0 !important;
       margin: 0 !important;
-      /* Гарантирует правильные пропорции на любом экране */
-      object-fit: contain !important; 
+      padding: 0 !important;
+      object-fit: cover !important;
     }
 
-    body.is-fullscreen .app-container > *:not(#canvas_ui_column) {
-      display: none !important;
-    }
-
-    body.is-fullscreen .toolbar,
-    body.is-fullscreen fps,
-    body.is-fullscreen #status {
-      display: none !important;
-    }
+    body.is-fullscreen .app-container > *:not(#canvas_ui_column) { display: none !important; }
+    body.is-fullscreen .toolbar, body.is-fullscreen fps, body.is-fullscreen #status { display: none !important; }
 
     #btn_exit_fullscreen {
       display: none;
@@ -291,15 +274,12 @@
       backdrop-filter: blur(5px);
     }
 
-    body.is-fullscreen #btn_exit_fullscreen {
-      display: block !important;
-    }
+    body.is-fullscreen #btn_exit_fullscreen { display: block !important; }
   </style>
 </head>
 <body>
 
   <div class="app-container">
-    
     <div id="canvas_ui_column">
       <canvas id="canvas"></canvas>
       <button id="btn_exit_fullscreen">❌ Закрыть</button>
@@ -312,7 +292,7 @@
         <button id="regrow" class="text_button">Регенерация</button>
         <button id="reset" class="text_button">Сброс</button>
         <button id="example" class="text_button">Пример</button>
-        <button id="btn_custom_fullscreen" class="text_button btn-fullscreen">🎥 Включить на весь экран (для записи)</button>
+        <button id="btn_custom_fullscreen" class="text_button btn-fullscreen">🎥 На весь экран (Запись)</button>
       </div>
     </div>
 
@@ -322,31 +302,25 @@
       
       <div style="display: flex; gap: 8px; margin-bottom: 10px;">
         <button id="btn_mic" class="text_button" style="flex: 1;">Микрофон</button>
-        <label for="audio_upload" class="text_button" style="flex: 1; margin: 0; display: flex; align-items: center; justify-content: center;">Загрузить файл</label>
+        <label for="audio_upload" class="text_button" style="flex: 1; margin: 0; display: flex; align-items: center; justify-content: center;">Загрузить трек</label>
         <input type="file" id="audio_upload" accept="audio/*" style="display: none;">
       </div>
+      <div id="audio_loading" style="display:none; color: var(--accent-color); text-align: center; font-size: 13px; margin-bottom: 10px;">Загрузка трека...</div>
       <button id="btn_audio_stop" class="text_button" style="width: 100%; display: none; background: #d63031; border-color: #b33939; margin-bottom: 15px;">Остановить звук</button>
-      <audio id="audio_player" controls style="width: 100%; margin-bottom: 15px; display: none; border-radius: 6px;"></audio>
+      <audio id="audio_player" controls style="width: 100%; margin-bottom: 15px; display: none; border-radius: 6px;" preload="auto"></audio>
 
       <div class="audio-slider-container">
-        <div class="audio-slider-label">
-          <span>Низкие частоты (Bass)</span><span id="val_low_label">1.5x</span>
-        </div>
+        <div class="audio-slider-label"><span>Низкие (Bass)</span><span id="val_low_label">1.5x</span></div>
         <input type="range" id="sens_low" min="0" max="4" step="0.1" value="1.5">
 
-        <div class="audio-slider-label">
-          <span>Средние частоты (Mids)</span><span id="val_mid_label">1.0x</span>
-        </div>
+        <div class="audio-slider-label"><span>Средние (Mids)</span><span id="val_mid_label">1.0x</span></div>
         <input type="range" id="sens_mid" min="0" max="4" step="0.1" value="1.0">
 
-        <div class="audio-slider-label">
-          <span>Высокие частоты (Highs)</span><span id="val_high_label">0.5x</span>
-        </div>
+        <div class="audio-slider-label"><span>Высокие (Highs)</span><span id="val_high_label">0.5x</span></div>
         <input type="range" id="sens_high" min="0" max="4" step="0.1" value="0.5">
       </div>
     </details>
 
-    <!-- Карта узоров -->
     <div id="map_ui_column">
       <details open>
         <summary>Карта Узоров <kf style="font-size:12px; font-weight:normal; opacity:0.7; color: white;"></kf></summary>
@@ -364,7 +338,6 @@
       </details>
     </div>
 
-    <!-- Цветовые палитры -->
     <details>
       <summary>Настройка цвета</summary>
       <div class="icon-grid">
@@ -395,7 +368,6 @@
       </div>
     </details>
 
-    <!-- Масштаб и Скорость -->
     <details>
       <summary>Масштаб и Скорость</summary>
       <div class="slider" id="scale_all"><div class="slider_text">Общий масштаб</div><div class="slider_track"><div class="slider_zero_tick"></div></div><div class="slider_thumb"></div></div>
@@ -405,7 +377,6 @@
       <div class="slider" id="speed"><div class="slider_text">Скорость (Speed)</div><div class="slider_track"><div class="slider_zero_tick"></div></div><div class="slider_thumb"></div></div>
     </details>
 
-    <!-- Потоки (Flow) -->
     <details>
       <summary>Потоки движения</summary>
       <div class="slider" id="flow_radial"><div class="slider_text">Радиальный поток</div><div class="slider_track"><div class="slider_zero_tick"></div></div><div class="slider_thumb"></div></div>
@@ -417,7 +388,6 @@
       <div class="slider" id="flow_vert"><div class="slider_text">Вертикальный поток</div><div class="slider_track"><div class="slider_zero_tick"></div></div><div class="slider_thumb"></div></div>
     </details>
 
-    <!-- Ориентация -->
     <details id="orientation">
       <summary>Ориентация</summary>
       <div class="slider" id="orientation_radial"><div class="slider_text">Радиальная</div><div class="slider_track"><div class="slider_zero_tick"></div></div><div class="slider_thumb"></div></div>
@@ -428,7 +398,6 @@
     </details>
   </div>
 
-  <!-- Технический слой (невидим) -->
   <div class="tech-layer">
     <div id="canvas_aspect_icon" style="width: 20px; height: 20px;"></div>
     <div id="draw_seeds_icon"></div>
@@ -438,22 +407,14 @@
     <button id="fullscreen"></button>
   </div>
 
-  <!-- Логика полноэкранного режима и инициализация Wasm -->
   <script>
-    if (window.Telegram && window.Telegram.WebApp) {
-        window.Telegram.WebApp.expand();
-    }
+    if (window.Telegram && window.Telegram.WebApp) { window.Telegram.WebApp.expand(); }
     
     const btnCustomFS = document.getElementById('btn_custom_fullscreen');
     const btnExitFS = document.getElementById('btn_exit_fullscreen');
 
-    btnCustomFS.addEventListener('click', () => {
-      document.body.classList.add('is-fullscreen');
-    });
-
-    btnExitFS.addEventListener('click', () => {
-      document.body.classList.remove('is-fullscreen');
-    });
+    btnCustomFS.addEventListener('click', () => { document.body.classList.add('is-fullscreen'); });
+    btnExitFS.addEventListener('click', () => { document.body.classList.remove('is-fullscreen'); });
 
     var statusElement = document.getElementById('status');
     var Module = {
@@ -470,7 +431,6 @@
   <script src="rdtool2.js"></script>
   <script src="rdtool-ems.js"></script>
 
-  <!-- Скрипт аудио-реактивности с эквалайзером -->
   <script>
     let audioContext, analyser, source, audioDataArray, animationId;
     let isAudioActive = false;
@@ -479,8 +439,8 @@
     const audioUpload = document.getElementById('audio_upload');
     const btnAudioStop = document.getElementById('btn_audio_stop');
     const audioPlayer = document.getElementById('audio_player');
+    const audioLoading = document.getElementById('audio_loading');
 
-    // Получаем элементы новых ползунков
     const sensLow = document.getElementById('sens_low');
     const sensMid = document.getElementById('sens_mid');
     const sensHigh = document.getElementById('sens_high');
@@ -488,7 +448,6 @@
     const labelMid = document.getElementById('val_mid_label');
     const labelHigh = document.getElementById('val_high_label');
 
-    // Обновление текста рядом с ползунками
     sensLow.addEventListener('input', (e) => labelLow.innerText = e.target.value + 'x');
     sensMid.addEventListener('input', (e) => labelMid.innerText = e.target.value + 'x');
     sensHigh.addEventListener('input', (e) => labelHigh.innerText = e.target.value + 'x');
@@ -500,7 +459,7 @@
       if (audioContext.state === 'suspended') { audioContext.resume(); }
       if (!analyser) {
         analyser = audioContext.createAnalyser();
-        analyser.fftSize = 256; // 128 полос частот
+        analyser.fftSize = 256; 
         audioDataArray = new Uint8Array(analyser.frequencyBinCount);
       }
     }
@@ -523,16 +482,27 @@
     audioUpload.addEventListener('change', function(e) {
       const file = e.target.files[0];
       if (!file) return;
+      
       setupAudioNode();
-      audioPlayer.src = URL.createObjectURL(file);
-      audioPlayer.style.display = 'block';
+      audioLoading.style.display = 'block';
+      
+      const fileURL = URL.createObjectURL(file);
+      audioPlayer.src = fileURL;
+      audioPlayer.load();
+      
       if (source) source.disconnect();
       source = audioContext.createMediaElementSource(audioPlayer);
       source.connect(analyser);
       analyser.connect(audioContext.destination); 
-      audioPlayer.play();
-      startAudioLoop();
-      btnAudioStop.style.display = 'block';
+      
+      audioPlayer.oncanplay = () => {
+        audioLoading.style.display = 'none';
+        audioPlayer.style.display = 'block';
+        btnAudioStop.style.display = 'block';
+        audioPlayer.play().then(() => {
+          startAudioLoop();
+        }).catch(err => console.log("Для старта нажмите Play в плеере"));
+      };
     });
 
     btnAudioStop.addEventListener('click', () => {
@@ -542,6 +512,7 @@
       audioPlayer.pause();
       audioPlayer.style.display = 'none';
       btnAudioStop.style.display = 'none';
+      audioLoading.style.display = 'none';
       
       if (typeof param_targets !== 'undefined') {
         param_targets['speed'] = 0;
@@ -556,31 +527,22 @@
         animationId = requestAnimationFrame(renderAudioFrame);
         analyser.getByteFrequencyData(audioDataArray);
         
-        // Разбиваем 128 полос на 3 диапазона
         let sumLow = 0, sumMid = 0, sumHigh = 0;
-        
-        // Низкие частоты (Bass): первые 10 полос
         for (let i = 0; i < 10; i++) sumLow += audioDataArray[i];
-        // Средние частоты (Mids): с 10 по 60 полосу
         for (let i = 10; i < 60; i++) sumMid += audioDataArray[i];
-        // Высокие частоты (Highs): с 60 по 127 полосу
         for (let i = 60; i < 128; i++) sumHigh += audioDataArray[i];
 
-        // Нормализуем громкость каждого диапазона (0.0 - 1.0)
         let normLow = (sumLow / 10) / 255;
         let normMid = (sumMid / 50) / 255;
         let normHigh = (sumHigh / 68) / 255;
 
-        // Получаем значения чувствительности от пользователя
         let valLow = parseFloat(sensLow.value);
         let valMid = parseFloat(sensMid.value);
         let valHigh = parseFloat(sensHigh.value);
 
-        // Комбинируем общую реакцию на основе эквалайзера
         let totalReaction = (normLow * valLow) + (normMid * valMid) + (normHigh * valHigh);
 
         if (typeof param_targets !== 'undefined') {
-          // Применяем вычисления к симуляции
           param_targets['speed'] = totalReaction * 0.8; 
           param_targets['scale_all'] = (totalReaction * 0.3) - 0.15;
         }
