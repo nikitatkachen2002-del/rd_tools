@@ -2,7 +2,7 @@
 <html lang="ru">
 <head>
   <meta charset="UTF-8">
-  <title>RD Tool Telegram Mini App - Pro Version</title>
+  <title>RD Tool Telegram Mini App - Audio Pro</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <style>
@@ -119,7 +119,7 @@
       color: var(--accent-color);
     }
 
-    /* Карта узоров (Механика восстановлена) */
+    /* Карта узоров */
     #pattern_map {
       width: 100%;
       aspect-ratio: 1;
@@ -132,7 +132,6 @@
       box-shadow: 0 2px 8px rgba(0,0,0,0.5);
     }
 
-    /* Блокировка перехвата кликов кольцами */
     #pattern_ring1, #pattern_ring2 {
       position: absolute;
       border: 3px solid var(--accent-color);
@@ -144,7 +143,7 @@
     }
     #pattern_ring2 { border-color: #ffb142; visibility: hidden; }
 
-    /* Сетка цветовых карт и узоров */
+    /* Сетка иконок */
     .icon-grid {
       display: grid;
       grid-template-columns: repeat(6, 1fr);
@@ -188,7 +187,7 @@
       border-color: var(--accent-color);
     }
 
-    /* Ползунки (Адаптивные и точные) */
+    /* Системные ползунки rdtool2.js */
     .slider {
       position: relative;
       height: 40px;
@@ -198,10 +197,7 @@
       cursor: pointer;
     }
 
-    .slider_text, .slider_track, .slider_zero_tick, .slider_thumb {
-      pointer-events: none;
-    }
-
+    .slider_text, .slider_track, .slider_zero_tick, .slider_thumb { pointer-events: none; }
     .slider_text { position: absolute; left: 0; top: 0; font-size: 12px; opacity: 0.85; }
     .slider_track { position: absolute; top: 22px; width: 100%; height: 6px; background: rgba(255,255,255,0.15); border-radius: 3px; }
     .slider_zero_tick { position: absolute; left: 50%; width: 2px; height: 100%; background: rgba(255,255,255,0.4); }
@@ -217,80 +213,93 @@
       box-shadow: 0 2px 4px rgba(0,0,0,0.5);
     }
 
-    /* Технические элементы: спрятаны за пределы экрана, но сохраняют размеры для работы скрипта */
+    /* Стили для новых аудио-ползунков */
+    .audio-slider-container { margin-top: 10px; }
+    .audio-slider-label { font-size: 12px; margin-bottom: 4px; display: flex; justify-content: space-between; }
+    input[type=range] {
+      -webkit-appearance: none;
+      width: 100%;
+      background: transparent;
+      margin-bottom: 15px;
+    }
+    input[type=range]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      height: 16px; width: 16px;
+      border-radius: 50%;
+      background: #ffb142;
+      cursor: pointer;
+      margin-top: -5px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.5);
+    }
+    input[type=range]::-webkit-slider-runnable-track {
+      width: 100%; height: 6px;
+      background: rgba(255,255,255,0.15);
+      border-radius: 3px;
+    }
+
+    /* Технические элементы */
     .tech-layer {
-      position: absolute;
-      left: -9999px;
-      top: -9999px;
-      opacity: 0;
-      pointer-events: none;
+      position: absolute; left: -9999px; top: -9999px; opacity: 0; pointer-events: none;
     }
 
     /* ========================================= */
-    /* СТИЛИ БЕЗОТКАЗНОГО ПОЛНОЭКРАННОГО РЕЖИМА  */
+    /* ЖЕСТКИЙ ПОЛНОЭКРАННЫЙ РЕЖИМ (ФИКС)        */
     /* ========================================= */
     body.is-fullscreen {
-      overflow: hidden;
-      background: #000;
+      overflow: hidden !important;
+      background: #000 !important;
     }
     
-    body.is-fullscreen #canvas_ui_column {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100vw;
-      height: 100vh;
-      z-index: 99999;
-      background: #000;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 0;
-      margin: 0;
+    body.is-fullscreen canvas {
+      position: fixed !important;
+      top: 0 !important;
+      left: 0 !important;
+      width: 100vw !important;
+      height: 100vh !important;
+      z-index: 99998 !important;
+      background: #000 !important;
+      border-radius: 0 !important;
+      margin: 0 !important;
+      /* Гарантирует правильные пропорции на любом экране */
+      object-fit: contain !important; 
     }
 
-    body.is-fullscreen canvas {
-      max-height: 100vh;
-      border-radius: 0;
-      margin: 0;
-      box-shadow: none;
+    body.is-fullscreen .app-container > *:not(#canvas_ui_column) {
+      display: none !important;
     }
 
     body.is-fullscreen .toolbar,
     body.is-fullscreen fps,
-    body.is-fullscreen #status,
-    body.is-fullscreen details,
-    body.is-fullscreen #map_ui_column,
-    body.is-fullscreen .app-container > details {
+    body.is-fullscreen #status {
       display: none !important;
     }
 
     #btn_exit_fullscreen {
       display: none;
-      position: absolute;
+      position: fixed;
       top: 20px;
       right: 20px;
-      background: rgba(0, 0, 0, 0.6);
+      background: rgba(0, 0, 0, 0.7);
       color: #fff;
       border: 1px solid rgba(255, 255, 255, 0.3);
       padding: 10px 20px;
       border-radius: 8px;
       font-size: 14px;
       font-weight: bold;
-      z-index: 100000;
+      z-index: 99999 !important;
       cursor: pointer;
       backdrop-filter: blur(5px);
     }
 
     body.is-fullscreen #btn_exit_fullscreen {
-      display: block;
+      display: block !important;
     }
   </style>
 </head>
 <body>
 
   <div class="app-container">
-    <!-- Холст и основные кнопки -->
+    
     <div id="canvas_ui_column">
       <canvas id="canvas"></canvas>
       <button id="btn_exit_fullscreen">❌ Закрыть</button>
@@ -307,16 +316,34 @@
       </div>
     </div>
 
-    <!-- Аудио-реактивность (Звук) -->
-    <details>
+    <!-- Аудио-реактивность (Звук + Эквалайзер) -->
+    <details open>
       <summary>Аудио-реактивность (Звук)</summary>
+      
       <div style="display: flex; gap: 8px; margin-bottom: 10px;">
         <button id="btn_mic" class="text_button" style="flex: 1;">Микрофон</button>
         <label for="audio_upload" class="text_button" style="flex: 1; margin: 0; display: flex; align-items: center; justify-content: center;">Загрузить файл</label>
         <input type="file" id="audio_upload" accept="audio/*" style="display: none;">
       </div>
-      <button id="btn_audio_stop" class="text_button" style="width: 100%; display: none; background: #d63031; border-color: #b33939;">Остановить звук</button>
-      <audio id="audio_player" controls style="width: 100%; margin-top: 10px; display: none; border-radius: 6px;"></audio>
+      <button id="btn_audio_stop" class="text_button" style="width: 100%; display: none; background: #d63031; border-color: #b33939; margin-bottom: 15px;">Остановить звук</button>
+      <audio id="audio_player" controls style="width: 100%; margin-bottom: 15px; display: none; border-radius: 6px;"></audio>
+
+      <div class="audio-slider-container">
+        <div class="audio-slider-label">
+          <span>Низкие частоты (Bass)</span><span id="val_low_label">1.5x</span>
+        </div>
+        <input type="range" id="sens_low" min="0" max="4" step="0.1" value="1.5">
+
+        <div class="audio-slider-label">
+          <span>Средние частоты (Mids)</span><span id="val_mid_label">1.0x</span>
+        </div>
+        <input type="range" id="sens_mid" min="0" max="4" step="0.1" value="1.0">
+
+        <div class="audio-slider-label">
+          <span>Высокие частоты (Highs)</span><span id="val_high_label">0.5x</span>
+        </div>
+        <input type="range" id="sens_high" min="0" max="4" step="0.1" value="0.5">
+      </div>
     </details>
 
     <!-- Карта узоров -->
@@ -401,7 +428,7 @@
     </details>
   </div>
 
-  <!-- Технический слой (ОБЯЗАТЕЛЕН для скрипта, спрятан за пределами экрана) -->
+  <!-- Технический слой (невидим) -->
   <div class="tech-layer">
     <div id="canvas_aspect_icon" style="width: 20px; height: 20px;"></div>
     <div id="draw_seeds_icon"></div>
@@ -411,26 +438,21 @@
     <button id="fullscreen"></button>
   </div>
 
-  <!-- Базовая инициализация и полноэкранная логика -->
+  <!-- Логика полноэкранного режима и инициализация Wasm -->
   <script>
     if (window.Telegram && window.Telegram.WebApp) {
         window.Telegram.WebApp.expand();
     }
     
-    // Логика безотказного полноэкранного режима
     const btnCustomFS = document.getElementById('btn_custom_fullscreen');
     const btnExitFS = document.getElementById('btn_exit_fullscreen');
 
     btnCustomFS.addEventListener('click', () => {
       document.body.classList.add('is-fullscreen');
-      // Заставляем скрипт пересчитать размер холста
-      window.dispatchEvent(new Event('resize')); 
     });
 
     btnExitFS.addEventListener('click', () => {
       document.body.classList.remove('is-fullscreen');
-      // Возвращаем исходный размер
-      window.dispatchEvent(new Event('resize')); 
     });
 
     var statusElement = document.getElementById('status');
@@ -445,11 +467,10 @@
     };
   </script>
 
-  <!-- Скрипты движка симуляции -->
   <script src="rdtool2.js"></script>
   <script src="rdtool-ems.js"></script>
 
-  <!-- Скрипт аудио-реактивности -->
+  <!-- Скрипт аудио-реактивности с эквалайзером -->
   <script>
     let audioContext, analyser, source, audioDataArray, animationId;
     let isAudioActive = false;
@@ -459,6 +480,19 @@
     const btnAudioStop = document.getElementById('btn_audio_stop');
     const audioPlayer = document.getElementById('audio_player');
 
+    // Получаем элементы новых ползунков
+    const sensLow = document.getElementById('sens_low');
+    const sensMid = document.getElementById('sens_mid');
+    const sensHigh = document.getElementById('sens_high');
+    const labelLow = document.getElementById('val_low_label');
+    const labelMid = document.getElementById('val_mid_label');
+    const labelHigh = document.getElementById('val_high_label');
+
+    // Обновление текста рядом с ползунками
+    sensLow.addEventListener('input', (e) => labelLow.innerText = e.target.value + 'x');
+    sensMid.addEventListener('input', (e) => labelMid.innerText = e.target.value + 'x');
+    sensHigh.addEventListener('input', (e) => labelHigh.innerText = e.target.value + 'x');
+
     function setupAudioNode() {
       if (!audioContext) {
         audioContext = new (window.AudioContext || window.webkitAudioContext)();
@@ -466,7 +500,7 @@
       if (audioContext.state === 'suspended') { audioContext.resume(); }
       if (!analyser) {
         analyser = audioContext.createAnalyser();
-        analyser.fftSize = 256; 
+        analyser.fftSize = 256; // 128 полос частот
         audioDataArray = new Uint8Array(analyser.frequencyBinCount);
       }
     }
@@ -522,13 +556,33 @@
         animationId = requestAnimationFrame(renderAudioFrame);
         analyser.getByteFrequencyData(audioDataArray);
         
-        let sum = 0;
-        for (let i = 0; i < audioDataArray.length; i++) sum += audioDataArray[i];
-        let normalizedVolume = (sum / audioDataArray.length) / 255;
+        // Разбиваем 128 полос на 3 диапазона
+        let sumLow = 0, sumMid = 0, sumHigh = 0;
+        
+        // Низкие частоты (Bass): первые 10 полос
+        for (let i = 0; i < 10; i++) sumLow += audioDataArray[i];
+        // Средние частоты (Mids): с 10 по 60 полосу
+        for (let i = 10; i < 60; i++) sumMid += audioDataArray[i];
+        // Высокие частоты (Highs): с 60 по 127 полосу
+        for (let i = 60; i < 128; i++) sumHigh += audioDataArray[i];
+
+        // Нормализуем громкость каждого диапазона (0.0 - 1.0)
+        let normLow = (sumLow / 10) / 255;
+        let normMid = (sumMid / 50) / 255;
+        let normHigh = (sumHigh / 68) / 255;
+
+        // Получаем значения чувствительности от пользователя
+        let valLow = parseFloat(sensLow.value);
+        let valMid = parseFloat(sensMid.value);
+        let valHigh = parseFloat(sensHigh.value);
+
+        // Комбинируем общую реакцию на основе эквалайзера
+        let totalReaction = (normLow * valLow) + (normMid * valMid) + (normHigh * valHigh);
 
         if (typeof param_targets !== 'undefined') {
-          param_targets['speed'] = normalizedVolume * 1.5; 
-          param_targets['scale_all'] = (normalizedVolume * 0.5) - 0.2;
+          // Применяем вычисления к симуляции
+          param_targets['speed'] = totalReaction * 0.8; 
+          param_targets['scale_all'] = (totalReaction * 0.3) - 0.15;
         }
       }
       renderAudioFrame();
