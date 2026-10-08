@@ -2,11 +2,11 @@
 <html lang="ru">
 <head>
   <meta charset="UTF-8">
-  <title>RD Tool Telegram Mini App - Full Mechanics</title>
+  <title>RD Tool Telegram Mini App - Pro Version</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <style>
-    /* Основные цвета и стили */
+    /* Базовая тема */
     :root {
       --bg-color: var(--tg-theme-bg-color, #1a1a1a);
       --text-color: var(--tg-theme-text-color, #ffffff);
@@ -26,12 +26,13 @@
       flex-direction: column;
       align-items: center;
       overflow-x: hidden;
+      width: 100vw;
     }
 
-    /* Главный контейнер (адаптивный) */
+    /* Адаптивный главный контейнер */
     .app-container {
       width: 100%;
-      max-width: 600px; /* Идеально для ПК и планшетов, на телефонах будет 100% */
+      max-width: 600px;
       display: flex;
       flex-direction: column;
       gap: 10px;
@@ -95,9 +96,11 @@
       background: var(--accent-color);
       border: none;
       color: white;
+      padding: 12px;
+      font-size: 14px;
     }
 
-    /* Секции настроек */
+    /* Аккордеоны настроек */
     details {
       background: rgba(255,255,255,0.05);
       padding: 12px;
@@ -116,7 +119,7 @@
       color: var(--accent-color);
     }
 
-    /* Карта узоров */
+    /* Карта узоров (Механика восстановлена) */
     #pattern_map {
       width: 100%;
       aspect-ratio: 1;
@@ -129,7 +132,7 @@
       box-shadow: 0 2px 8px rgba(0,0,0,0.5);
     }
 
-    /* ВАЖНО: pointer-events: none, чтобы кольца не блокировали клик по карте */
+    /* Блокировка перехвата кликов кольцами */
     #pattern_ring1, #pattern_ring2 {
       position: absolute;
       border: 3px solid var(--accent-color);
@@ -141,7 +144,7 @@
     }
     #pattern_ring2 { border-color: #ffb142; visibility: hidden; }
 
-    /* Сетка иконок */
+    /* Сетка цветовых карт и узоров */
     .icon-grid {
       display: grid;
       grid-template-columns: repeat(6, 1fr);
@@ -185,7 +188,7 @@
       border-color: var(--accent-color);
     }
 
-    /* Ползунки */
+    /* Ползунки (Адаптивные и точные) */
     .slider {
       position: relative;
       height: 40px;
@@ -195,36 +198,14 @@
       cursor: pointer;
     }
 
-    /* ВАЖНО: pointer-events: none, чтобы клик всегда попадал в .slider */
     .slider_text, .slider_track, .slider_zero_tick, .slider_thumb {
       pointer-events: none;
     }
 
-    .slider_text {
-      position: absolute;
-      left: 0;
-      top: 0;
-      font-size: 12px;
-      opacity: 0.85;
-    }
-
-    .slider_track {
-      position: absolute;
-      top: 22px;
-      width: 100%;
-      height: 6px;
-      background: rgba(255,255,255,0.15);
-      border-radius: 3px;
-    }
-
-    .slider_zero_tick {
-      position: absolute;
-      left: 50%;
-      width: 2px;
-      height: 100%;
-      background: rgba(255,255,255,0.4);
-    }
-
+    .slider_text { position: absolute; left: 0; top: 0; font-size: 12px; opacity: 0.85; }
+    .slider_track { position: absolute; top: 22px; width: 100%; height: 6px; background: rgba(255,255,255,0.15); border-radius: 3px; }
+    .slider_zero_tick { position: absolute; left: 50%; width: 2px; height: 100%; background: rgba(255,255,255,0.4); }
+    
     .slider_thumb {
       position: absolute;
       top: 17px;
@@ -236,22 +217,83 @@
       box-shadow: 0 2px 4px rgba(0,0,0,0.5);
     }
 
-    /* Скрытие технических элементов без поломки скрипта */
-    .hidden-tech {
+    /* Технические элементы: спрятаны за пределы экрана, но сохраняют размеры для работы скрипта */
+    .tech-layer {
       position: absolute;
-      visibility: hidden;
-      width: 0;
-      height: 0;
+      left: -9999px;
+      top: -9999px;
+      opacity: 0;
       pointer-events: none;
+    }
+
+    /* ========================================= */
+    /* СТИЛИ БЕЗОТКАЗНОГО ПОЛНОЭКРАННОГО РЕЖИМА  */
+    /* ========================================= */
+    body.is-fullscreen {
+      overflow: hidden;
+      background: #000;
+    }
+    
+    body.is-fullscreen #canvas_ui_column {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      z-index: 99999;
+      background: #000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0;
+      margin: 0;
+    }
+
+    body.is-fullscreen canvas {
+      max-height: 100vh;
+      border-radius: 0;
+      margin: 0;
+      box-shadow: none;
+    }
+
+    body.is-fullscreen .toolbar,
+    body.is-fullscreen fps,
+    body.is-fullscreen #status,
+    body.is-fullscreen details,
+    body.is-fullscreen #map_ui_column,
+    body.is-fullscreen .app-container > details {
+      display: none !important;
+    }
+
+    #btn_exit_fullscreen {
+      display: none;
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      background: rgba(0, 0, 0, 0.6);
+      color: #fff;
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      padding: 10px 20px;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: bold;
+      z-index: 100000;
+      cursor: pointer;
+      backdrop-filter: blur(5px);
+    }
+
+    body.is-fullscreen #btn_exit_fullscreen {
+      display: block;
     }
   </style>
 </head>
 <body>
 
   <div class="app-container">
-    <!-- Холст и основные элементы управления -->
+    <!-- Холст и основные кнопки -->
     <div id="canvas_ui_column">
       <canvas id="canvas"></canvas>
+      <button id="btn_exit_fullscreen">❌ Закрыть</button>
       <fps>fps: --</fps>
       <div id="status" style="color:#aaa; font-size: 12px; text-align: center; margin-bottom: 5px;"></div>
 
@@ -261,8 +303,7 @@
         <button id="regrow" class="text_button">Регенерация</button>
         <button id="reset" class="text_button">Сброс</button>
         <button id="example" class="text_button">Пример</button>
-        <!-- Кнопка на весь экран -->
-        <button id="fullscreen" class="text_button btn-fullscreen">Включить на весь экран</button>
+        <button id="btn_custom_fullscreen" class="text_button btn-fullscreen">🎥 Включить на весь экран (для записи)</button>
       </div>
     </div>
 
@@ -360,18 +401,38 @@
     </details>
   </div>
 
-  <!-- Технические элементы (не удалять, скрыты через CSS класс) -->
-  <div class="hidden-tech">
-    <div id="canvas_aspect_icon"></div>
+  <!-- Технический слой (ОБЯЗАТЕЛЕН для скрипта, спрятан за пределами экрана) -->
+  <div class="tech-layer">
+    <div id="canvas_aspect_icon" style="width: 20px; height: 20px;"></div>
     <div id="draw_seeds_icon"></div>
     <example_n id="example_n"></example_n>
     <debug></debug>
     <button id="help_button"></button>
+    <button id="fullscreen"></button>
   </div>
 
-  <!-- Скрипты движка -->
+  <!-- Базовая инициализация и полноэкранная логика -->
   <script>
-    window.Telegram.WebApp.expand();
+    if (window.Telegram && window.Telegram.WebApp) {
+        window.Telegram.WebApp.expand();
+    }
+    
+    // Логика безотказного полноэкранного режима
+    const btnCustomFS = document.getElementById('btn_custom_fullscreen');
+    const btnExitFS = document.getElementById('btn_exit_fullscreen');
+
+    btnCustomFS.addEventListener('click', () => {
+      document.body.classList.add('is-fullscreen');
+      // Заставляем скрипт пересчитать размер холста
+      window.dispatchEvent(new Event('resize')); 
+    });
+
+    btnExitFS.addEventListener('click', () => {
+      document.body.classList.remove('is-fullscreen');
+      // Возвращаем исходный размер
+      window.dispatchEvent(new Event('resize')); 
+    });
+
     var statusElement = document.getElementById('status');
     var Module = {
       print: function(text) { console.log(text); },
@@ -383,6 +444,8 @@
       }
     };
   </script>
+
+  <!-- Скрипты движка симуляции -->
   <script src="rdtool2.js"></script>
   <script src="rdtool-ems.js"></script>
 
