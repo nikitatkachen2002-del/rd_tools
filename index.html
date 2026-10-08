@@ -2,17 +2,17 @@
 <html lang="ru">
 <head>
   <meta charset="UTF-8">
-  <title>RD Tool Telegram Mini App - Telegram Perfect Fullscreen</title>
+  <title>Reaction-Diffusion Tool - Karl Sims Style</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <style>
     :root {
-      --bg-color: var(--tg-theme-bg-color, #1a1a1a);
-      --text-color: var(--tg-theme-text-color, #ffffff);
-      --button-bg: var(--tg-theme-button-color, #333333);
-      --accent-color: var(--tg-theme-link-color, #00a8ff);
+      --bg-color: #121212;
+      --text-color: #ffffff;
+      --button-bg: #2a2a2a;
+      --accent-color: #00a8ff;
     }
-    
+
     * { box-sizing: border-box; }
 
     body {
@@ -31,7 +31,7 @@
 
     .app-container {
       width: 100%;
-      max-width: 600px;
+      max-width: 650px;
       display: flex;
       flex-direction: column;
       gap: 10px;
@@ -44,11 +44,12 @@
       position: relative;
     }
 
+    /* Холст симуляции */
     canvas {
       width: 100%;
       aspect-ratio: 16/9;
       background-color: #000;
-      border-radius: 10px;
+      border-radius: 8px;
       box-shadow: 0 4px 15px rgba(0,0,0,0.6);
       touch-action: none;
       margin-bottom: 5px;
@@ -63,6 +64,7 @@
       margin-bottom: 8px;
     }
 
+    /* Панель кнопок */
     .toolbar {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
@@ -73,36 +75,34 @@
     .text_button {
       background: var(--button-bg);
       color: #fff;
-      border: 1px solid #555;
-      padding: 10px 5px;
+      border: 1px solid #444;
+      padding: 12px 8px;
       border-radius: 8px;
       font-size: 13px;
       font-weight: 600;
       cursor: pointer;
       text-align: center;
-      transition: background 0.2s, transform 0.1s;
     }
 
     .text_button:active, .pause_paused {
       background: var(--accent-color);
-      transform: scale(0.95);
     }
 
     .btn-fullscreen {
       grid-column: span 3;
       background: var(--accent-color);
-      border: none;
       color: white;
-      padding: 12px;
+      border: none;
       font-size: 14px;
     }
 
+    /* Секции (Аккордеоны) */
     details {
-      background: rgba(255,255,255,0.05);
+      background: rgba(255,255,255,0.03);
       padding: 12px;
-      border-radius: 10px;
+      border-radius: 8px;
       margin-bottom: 10px;
-      border: 1px solid rgba(255,255,255,0.1);
+      border: 1px solid #333;
       width: 100%;
     }
 
@@ -111,10 +111,11 @@
       cursor: pointer;
       margin-bottom: 8px;
       outline: none;
-      font-size: 15px;
+      font-size: 14px;
       color: var(--accent-color);
     }
 
+    /* Карта узоров */
     #pattern_map {
       width: 100%;
       aspect-ratio: 1;
@@ -124,7 +125,6 @@
       border-radius: 8px;
       margin-bottom: 10px;
       touch-action: none;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.5);
     }
 
     #pattern_ring1, #pattern_ring2 {
@@ -159,30 +159,24 @@
       box-shadow: 0 0 8px var(--accent-color);
     }
 
-    .checkbox-group {
-      display: flex;
-      gap: 8px;
-    }
-
+    .checkbox-group { display: flex; gap: 8px; }
     .checkbox {
       flex: 1;
       background: var(--button-bg);
       color: #fff;
-      border: 1px solid #555;
-      padding: 8px 12px;
+      border: 1px solid #444;
+      padding: 8px;
       border-radius: 6px;
       text-align: center;
       cursor: pointer;
       font-size: 13px;
     }
-    .checkbox_checked {
-      background: var(--accent-color);
-      border-color: var(--accent-color);
-    }
+    .checkbox_checked { background: var(--accent-color); border-color: var(--accent-color); }
 
+    /* Ползунки */
     .slider {
       position: relative;
-      height: 40px;
+      height: 38px;
       width: 100%;
       margin-bottom: 6px;
       touch-action: none;
@@ -190,28 +184,27 @@
     }
 
     .slider_text, .slider_track, .slider_zero_tick, .slider_thumb { pointer-events: none; }
-    .slider_text { position: absolute; left: 0; top: 0; font-size: 12px; opacity: 0.85; }
-    .slider_track { position: absolute; top: 22px; width: 100%; height: 6px; background: rgba(255,255,255,0.15); border-radius: 3px; }
+    .slider_text { position: absolute; left: 0; top: 0; font-size: 11px; opacity: 0.85; }
+    .slider_track { position: absolute; top: 18px; width: 100%; height: 6px; background: rgba(255,255,255,0.15); border-radius: 3px; }
     .slider_zero_tick { position: absolute; left: 50%; width: 2px; height: 100%; background: rgba(255,255,255,0.4); }
-    
     .slider_thumb {
       position: absolute;
-      top: 17px;
+      top: 13px;
       left: 48.5%;
       width: 16px;
       height: 16px;
       background: var(--accent-color);
       border-radius: 50%;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.5);
+      box-shadow: 0 2px 4px rgba(0,0,0,0.3);
     }
 
-    .audio-slider-container { margin-top: 10px; }
-    .audio-slider-label { font-size: 12px; margin-bottom: 4px; display: flex; justify-content: space-between; }
+    .audio-controls { margin-top: 10px; }
+    .audio-label { font-size: 12px; margin-bottom: 4px; display: flex; justify-content: space-between; opacity: 0.9; }
     input[type=range] {
       -webkit-appearance: none;
       width: 100%;
       background: transparent;
-      margin-bottom: 15px;
+      margin-bottom: 12px;
     }
     input[type=range]::-webkit-slider-thumb {
       -webkit-appearance: none;
@@ -220,7 +213,6 @@
       background: #ffb142;
       cursor: pointer;
       margin-top: -5px;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.5);
     }
     input[type=range]::-webkit-slider-runnable-track {
       width: 100%; height: 6px;
@@ -228,11 +220,9 @@
       border-radius: 3px;
     }
 
-    .tech-layer {
-      position: absolute; left: -9999px; top: -9999px; opacity: 0; pointer-events: none;
-    }
+    .tech-layer { position: absolute; left: -9999px; top: -9999px; opacity: 0; pointer-events: none; }
 
-    /* АБСОЛЮТНЫЙ ПОЛНОЭКРАННЫЙ РЕЖИМ НА ВЕСЬ ЭКРАН */
+    /* ЖЕСТКИЙ И БЕЗОКАЗНЫЙ ПОЛНОЭКРАННЫЙ РЕЖИМ ДЛЯ ВСЕХ УСТРОЙСТВ */
     body.is-fullscreen {
       overflow: hidden !important;
       background: #000 !important;
@@ -242,8 +232,7 @@
     
     body.is-fullscreen #canvas_ui_column {
       position: fixed !important;
-      top: 0 !important;
-      left: 0 !important;
+      inset: 0 !important;
       width: 100vw !important;
       height: 100vh !important;
       z-index: 99998 !important;
@@ -275,7 +264,7 @@
       right: 20px;
       background: rgba(0, 0, 0, 0.7);
       color: #fff;
-      border: 1px solid rgba(255, 255, 255, 0.3);
+      border: 1px solid rgba(255, 255, 255, 0.4);
       padding: 10px 20px;
       border-radius: 8px;
       font-size: 14px;
@@ -298,43 +287,42 @@
       <div id="status" style="color:#aaa; font-size: 12px; text-align: center; margin-bottom: 5px;"></div>
 
       <div class="toolbar" id="buttons_ui_container">
-        <button id="pause" class="text_button">Пауза</button>
-        <button id="clear" class="text_button">Очистить</button>
-        <button id="regrow" class="text_button">Регенерация</button>
-        <button id="reset" class="text_button">Сброс</button>
-        <button id="example" class="text_button">Пример</button>
-        <button id="btn_custom_fullscreen" class="text_button btn-fullscreen">🎥 На весь экран (Запись)</button>
+        <button id="pause" class="text_button">Pause</button>
+        <button id="clear" class="text_button">Clear</button>
+        <button id="regrow" class="text_button">Regrow</button>
+        <button id="reset" class="text_button">Reset</button>
+        <button id="example" class="text_button">Example</button>
+        <button id="btn_custom_fullscreen" class="text_button btn-fullscreen">🎥 На весь экран (True Fullscreen)</button>
       </div>
     </div>
 
-    <!-- Аудио-реактивность (Звук + Эквалайзер) -->
+    <!-- Аудио-реактивность и эквалайзер -->
     <details open>
-      <summary>Аудио-реактивность (Звук)</summary>
-      
+      <summary>▼ Аудио-реактивность (Звук)</summary>
       <div style="display: flex; gap: 8px; margin-bottom: 10px;">
         <button id="btn_mic" class="text_button" style="flex: 1;">Микрофон</button>
-        <label for="audio_upload" class="text_button" style="flex: 1; margin: 0; display: flex; align-items: center; justify-content: center;">Загрузить трек</label>
+        <label for="audio_upload" class="text_button" style="flex: 1; margin: 0; display: flex; align-items: center; justify-content: center; cursor: pointer;">Загрузить трек</label>
         <input type="file" id="audio_upload" accept="audio/*" style="display: none;">
       </div>
-      <div id="audio_loading" style="display:none; color: var(--accent-color); text-align: center; font-size: 13px; margin-bottom: 10px;">Загрузка трека...</div>
-      <button id="btn_audio_stop" class="text_button" style="width: 100%; display: none; background: #d63031; border-color: #b33939; margin-bottom: 15px;">Остановить звук</button>
-      <audio id="audio_player" controls style="width: 100%; margin-bottom: 15px; display: none; border-radius: 6px;" preload="auto"></audio>
+      <div id="audio_loading" style="display:none; color: var(--accent-color); text-align: center; font-size: 13px; margin-bottom: 10px;">Загрузка файла...</div>
+      <button id="btn_audio_stop" class="text_button" style="width: 100%; display: none; background: #c23616; margin-bottom: 10px;">Остановить звук</button>
+      <audio id="audio_player" controls style="width: 100%; margin-bottom: 10px; display: none;" preload="auto"></audio>
 
-      <div class="audio-slider-container">
-        <div class="audio-slider-label"><span>Низкие (Bass)</span><span id="val_low_label">1.5x</span></div>
+      <div class="audio-controls">
+        <div class="audio-label"><span>Низкие (Bass)</span><span id="lbl_low">1.5x</span></div>
         <input type="range" id="sens_low" min="0" max="4" step="0.1" value="1.5">
 
-        <div class="audio-slider-label"><span>Средние (Mids)</span><span id="val_mid_label">1.0x</span></div>
+        <div class="audio-label"><span>Средние (Mids)</span><span id="lbl_mid">1.0x</span></div>
         <input type="range" id="sens_mid" min="0" max="4" step="0.1" value="1.0">
 
-        <div class="audio-slider-label"><span>Высокие (Highs)</span><span id="val_high_label">0.5x</span></div>
+        <div class="audio-label"><span>Высокие (Highs)</span><span id="lbl_high">0.5x</span></div>
         <input type="range" id="sens_high" min="0" max="4" step="0.1" value="0.5">
       </div>
     </details>
 
     <div id="map_ui_column">
       <details open>
-        <summary>Карта Узоров <kf style="font-size:12px; font-weight:normal; opacity:0.7; color: white;"></kf></summary>
+        <summary>▼ Карта Узоров <kf style="font-size:12px; font-weight:normal; opacity:0.7; color: white;"></kf></summary>
         <div id="pattern_map">
           <div id="pattern_ring1"></div>
           <div id="pattern_ring2"></div>
@@ -350,7 +338,7 @@
     </div>
 
     <details>
-      <summary>Настройка цвета</summary>
+      <summary>▼ Настройка цвета (Color Maps)</summary>
       <div class="icon-grid">
         <button id="cm0" class="cm_button cm_button_selected" style="background-image:url(https://karlsims.com/rdtool-images/cm0.png);"></button>
         <button id="cm1" class="cm_button" style="background-image:url(https://karlsims.com/rdtool-images/cm1.png);"></button>
@@ -366,46 +354,46 @@
         <button id="cm11" class="cm_button" style="background-image:url(https://karlsims.com/rdtool-images/cm11.png);"></button>
       </div>
       <div class="checkbox-group" style="margin-top: 8px;">
-        <button id="emboss" class="checkbox checkbox_checked"><div class="checkbox_text">Объем (Emboss)</div></button>
-        <button id="invert" class="checkbox"><div class="checkbox_text">Инверсия</div></button>
+        <button id="emboss" class="checkbox checkbox_checked"><div class="checkbox_text">Emboss</div></button>
+        <button id="invert" class="checkbox"><div class="checkbox_text">Invert</div></button>
       </div>
-      <div style="margin-top: 15px;" id="adjust_colors">
-        <div class="slider" id="hue"><div class="slider_text">Оттенок (Hue)</div><div class="slider_track"><div class="slider_zero_tick"></div></div><div class="slider_thumb"></div></div>
-        <div class="slider" id="saturation"><div class="slider_text">Насыщенность (Sat)</div><div class="slider_track"><div class="slider_zero_tick"></div></div><div class="slider_thumb"></div></div>
-        <div class="slider" id="brightness"><div class="slider_text">Яркость (Bright)</div><div class="slider_track"><div class="slider_zero_tick"></div></div><div class="slider_thumb"></div></div>
-        <div class="slider" id="contrast"><div class="slider_text">Контраст (Contrast)</div><div class="slider_track"><div class="slider_zero_tick"></div></div><div class="slider_thumb"></div></div>
-        <div class="slider" id="color_freq"><div class="slider_text">Частота (Freq)</div><div class="slider_track"><div class="slider_zero_tick"></div></div><div class="slider_thumb"></div></div>
-        <div class="slider" id="color_phase"><div class="slider_text">Фаза (Phase)</div><div class="slider_track"><div class="slider_zero_tick"></div></div><div class="slider_thumb"></div></div>
+      <div style="margin-top: 12px;" id="adjust_colors">
+        <div class="slider" id="hue"><div class="slider_text">Hue</div><div class="slider_track"><div class="slider_zero_tick"></div></div><div class="slider_thumb"></div></div>
+        <div class="slider" id="saturation"><div class="slider_text">Saturation</div><div class="slider_track"><div class="slider_zero_tick"></div></div><div class="slider_thumb"></div></div>
+        <div class="slider" id="brightness"><div class="slider_text">Brightness</div><div class="slider_track"><div class="slider_zero_tick"></div></div><div class="slider_thumb"></div></div>
+        <div class="slider" id="contrast"><div class="slider_text">Contrast</div><div class="slider_track"><div class="slider_zero_tick"></div></div><div class="slider_thumb"></div></div>
+        <div class="slider" id="color_freq"><div class="slider_text">Frequency</div><div class="slider_track"><div class="slider_zero_tick"></div></div><div class="slider_thumb"></div></div>
+        <div class="slider" id="color_phase"><div class="slider_text">Phase</div><div class="slider_track"><div class="slider_zero_tick"></div></div><div class="slider_thumb"></div></div>
       </div>
     </details>
 
     <details>
-      <summary>Масштаб и Скорость</summary>
-      <div class="slider" id="scale_all"><div class="slider_text">Общий масштаб</div><div class="slider_track"><div class="slider_zero_tick"></div></div><div class="slider_thumb"></div></div>
-      <div class="slider" id="scale_radial"><div class="slider_text">Радиальный масштаб</div><div class="slider_track"><div class="slider_zero_tick"></div></div><div class="slider_thumb"></div></div>
-      <div class="slider" id="scale_random"><div class="slider_text">Случайный масштаб</div><div class="slider_track"><div class="slider_zero_tick"></div></div><div class="slider_thumb"></div></div>
-      <div class="slider" id="scale_ring"><div class="slider_text">Масштаб кольца</div><div class="slider_track"><div class="slider_zero_tick"></div></div><div class="slider_thumb"></div></div>
-      <div class="slider" id="speed"><div class="slider_text">Скорость (Speed)</div><div class="slider_track"><div class="slider_zero_tick"></div></div><div class="slider_thumb"></div></div>
+      <summary>▼ Масштаб и Скорость (Scale & Speed)</summary>
+      <div class="slider" id="scale_all"><div class="slider_text">Scale</div><div class="slider_track"><div class="slider_zero_tick"></div></div><div class="slider_thumb"></div></div>
+      <div class="slider" id="scale_radial"><div class="slider_text">Scale Radial</div><div class="slider_track"><div class="slider_zero_tick"></div></div><div class="slider_thumb"></div></div>
+      <div class="slider" id="scale_random"><div class="slider_text">Scale Random</div><div class="slider_track"><div class="slider_zero_tick"></div></div><div class="slider_thumb"></div></div>
+      <div class="slider" id="scale_ring"><div class="slider_text">Scale Ring</div><div class="slider_track"><div class="slider_zero_tick"></div></div><div class="slider_thumb"></div></div>
+      <div class="slider" id="speed"><div class="slider_text">Speed</div><div class="slider_track"><div class="slider_zero_tick"></div></div><div class="slider_thumb"></div></div>
     </details>
 
     <details>
-      <summary>Потоки движения</summary>
-      <div class="slider" id="flow_radial"><div class="slider_text">Радиальный поток</div><div class="slider_track"><div class="slider_zero_tick"></div></div><div class="slider_thumb"></div></div>
-      <div class="slider" id="flow_rotate"><div class="slider_text">Вращение</div><div class="slider_track"><div class="slider_zero_tick"></div></div><div class="slider_thumb"></div></div>
-      <div class="slider" id="flow_swirl"><div class="slider_text">Завихрения (Swirl)</div><div class="slider_track"><div class="slider_zero_tick"></div></div><div class="slider_thumb"></div></div>
-      <div class="slider" id="flow_bubble"><div class="slider_text">Пузыри (Bubble)</div><div class="slider_track"><div class="slider_zero_tick"></div></div><div class="slider_thumb"></div></div>
-      <div class="slider" id="flow_ring"><div class="slider_text">Кольцевой поток</div><div class="slider_track"><div class="slider_zero_tick"></div></div><div class="slider_thumb"></div></div>
-      <div class="slider" id="flow_vortex"><div class="slider_text">Вортекс</div><div class="slider_track"><div class="slider_zero_tick"></div></div><div class="slider_thumb"></div></div>
-      <div class="slider" id="flow_vert"><div class="slider_text">Вертикальный поток</div><div class="slider_track"><div class="slider_zero_tick"></div></div><div class="slider_thumb"></div></div>
+      <summary>▼ Потоки (Flow)</summary>
+      <div class="slider" id="flow_radial"><div class="slider_text">Flow Radial</div><div class="slider_track"><div class="slider_zero_tick"></div></div><div class="slider_thumb"></div></div>
+      <div class="slider" id="flow_rotate"><div class="slider_text">Flow Rotate</div><div class="slider_track"><div class="slider_zero_tick"></div></div><div class="slider_thumb"></div></div>
+      <div class="slider" id="flow_swirl"><div class="slider_text">Flow Swirl</div><div class="slider_track"><div class="slider_zero_tick"></div></div><div class="slider_thumb"></div></div>
+      <div class="slider" id="flow_bubble"><div class="slider_text">Flow Bubble</div><div class="slider_track"><div class="slider_zero_tick"></div></div><div class="slider_thumb"></div></div>
+      <div class="slider" id="flow_ring"><div class="slider_text">Flow Ring</div><div class="slider_track"><div class="slider_zero_tick"></div></div><div class="slider_thumb"></div></div>
+      <div class="slider" id="flow_vortex"><div class="slider_text">Flow Vortex</div><div class="slider_track"><div class="slider_zero_tick"></div></div><div class="slider_thumb"></div></div>
+      <div class="slider" id="flow_vert"><div class="slider_text">Flow Vertical</div><div class="slider_track"><div class="slider_zero_tick"></div></div><div class="slider_thumb"></div></div>
     </details>
 
     <details id="orientation">
-      <summary>Ориентация</summary>
-      <div class="slider" id="orientation_radial"><div class="slider_text">Радиальная</div><div class="slider_track"><div class="slider_zero_tick"></div></div><div class="slider_thumb"></div></div>
-      <div class="slider" id="orientation_circles"><div class="slider_text">Круговая</div><div class="slider_track"><div class="slider_zero_tick"></div></div><div class="slider_thumb"></div></div>
-      <div class="slider" id="orientation_swirl"><div class="slider_text">Завихрение</div><div class="slider_track"><div class="slider_zero_tick"></div></div><div class="slider_thumb"></div></div>
-      <div class="slider" id="orientation_bubble"><div class="slider_text">Пузыри</div><div class="slider_track"><div class="slider_zero_tick"></div></div><div class="slider_thumb"></div></div>
-      <div class="slider" id="orientation_vert"><div class="slider_text">Линейная</div><div class="slider_track"><div class="slider_zero_tick"></div></div><div class="slider_thumb"></div></div>
+      <summary>▼ Ориентация (Orientation)</summary>
+      <div class="slider" id="orientation_radial"><div class="slider_text">Orientation Radial</div><div class="slider_track"><div class="slider_zero_tick"></div></div><div class="slider_thumb"></div></div>
+      <div class="slider" id="orientation_circles"><div class="slider_text">Orientation Circles</div><div class="slider_track"><div class="slider_zero_tick"></div></div><div class="slider_thumb"></div></div>
+      <div class="slider" id="orientation_swirl"><div class="slider_text">Orientation Swirl</div><div class="slider_track"><div class="slider_zero_tick"></div></div><div class="slider_thumb"></div></div>
+      <div class="slider" id="orientation_bubble"><div class="slider_text">Orientation Bubble</div><div class="slider_track"><div class="slider_zero_tick"></div></div><div class="slider_thumb"></div></div>
+      <div class="slider" id="orientation_vert"><div class="slider_text">Orientation Linear</div><div class="slider_track"><div class="slider_zero_tick"></div></div><div class="slider_thumb"></div></div>
     </details>
   </div>
 
@@ -418,12 +406,13 @@
     <button id="fullscreen"></button>
   </div>
 
+  <!-- Инициализация Telegram Mini App и полноэкранного режима -->
   <script>
     if (window.Telegram && window.Telegram.WebApp) {
         window.Telegram.WebApp.ready();
         window.Telegram.WebApp.expand();
     }
-    
+
     const btnCustomFS = document.getElementById('btn_custom_fullscreen');
     const btnExitFS = document.getElementById('btn_exit_fullscreen');
 
@@ -443,15 +432,17 @@
       printErr: function(text) { console.error(text); },
       setStatus: function(text) { if(statusElement) statusElement.innerHTML = text; },
       onRuntimeInitialized: function() {
-        console.log("WASM Runtime initialized.");
+        console.log("WASM Runtime initialized successfully.");
         if (typeof init === "function") { init(); }
       }
     };
   </script>
 
+  <!-- Подключение скриптов движка симуляции -->
   <script src="rdtool2.js"></script>
   <script src="rdtool-ems.js"></script>
 
+  <!-- Аудио-реактивность с поддержкой длинных треков и мобильных устройств -->
   <script>
     let audioContext, analyser, source, audioDataArray, animationId;
     let isAudioActive = false;
@@ -462,32 +453,34 @@
     const audioPlayer = document.getElementById('audio_player');
     const audioLoading = document.getElementById('audio_loading');
 
-    const sensLow = document.getElementById('sens_low');
-    const sensMid = document.getElementById('sens_mid');
-    const sensHigh = document.getElementById('sens_high');
-    const labelLow = document.getElementById('val_low_label');
-    const labelMid = document.getElementById('val_mid_label');
-    const labelHigh = document.getElementById('val_high_label');
+    const sLow = document.getElementById('sens_low');
+    const sMid = document.getElementById('sens_mid');
+    const sHigh = document.getElementById('sens_high');
+    const lLow = document.getElementById('lbl_low');
+    const lMid = document.getElementById('lbl_mid');
+    const lHigh = document.getElementById('lbl_high');
 
-    sensLow.addEventListener('input', (e) => labelLow.innerText = e.target.value + 'x');
-    sensMid.addEventListener('input', (e) => labelMid.innerText = e.target.value + 'x');
-    sensHigh.addEventListener('input', (e) => labelHigh.innerText = e.target.value + 'x');
+    sLow.addEventListener('input', (e) => lLow.innerText = e.target.value + 'x');
+    sMid.addEventListener('input', (e) => lMid.innerText = e.target.value + 'x');
+    sHigh.addEventListener('input', (e) => lHigh.innerText = e.target.value + 'x');
 
-    function setupAudioNode() {
+    function setupAudioContext() {
       if (!audioContext) {
         audioContext = new (window.AudioContext || window.webkitAudioContext)();
       }
-      if (audioContext.state === 'suspended') { audioContext.resume(); }
+      if (audioContext.state === 'suspended') {
+        audioContext.resume();
+      }
       if (!analyser) {
         analyser = audioContext.createAnalyser();
-        analyser.fftSize = 256; 
+        analyser.fftSize = 256;
         audioDataArray = new Uint8Array(analyser.frequencyBinCount);
       }
     }
 
     btnMic.addEventListener('click', async () => {
       try {
-        setupAudioNode();
+        setupAudioContext();
         const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
         if (source) source.disconnect();
         source = audioContext.createMediaStreamSource(stream);
@@ -496,33 +489,36 @@
         startAudioLoop();
         btnAudioStop.style.display = 'block';
       } catch (err) {
-        alert('Не удалось получить доступ к микрофону.');
+        alert('Нет доступа к микрофону.');
       }
     });
 
     audioUpload.addEventListener('change', function(e) {
       const file = e.target.files[0];
       if (!file) return;
-      
-      setupAudioNode();
+
+      setupAudioContext();
       audioLoading.style.display = 'block';
-      
+
+      // Надежная загрузка и создание URL для мобильных устройств (iOS/Android)
       const fileURL = URL.createObjectURL(file);
       audioPlayer.src = fileURL;
       audioPlayer.load();
-      
+
       if (source) source.disconnect();
       source = audioContext.createMediaElementSource(audioPlayer);
       source.connect(analyser);
-      analyser.connect(audioContext.destination); 
-      
+      analyser.connect(audioContext.destination);
+
       audioPlayer.oncanplay = () => {
         audioLoading.style.display = 'none';
         audioPlayer.style.display = 'block';
         btnAudioStop.style.display = 'block';
         audioPlayer.play().then(() => {
           startAudioLoop();
-        }).catch(err => console.log("Для старта нажмите Play в плеере"));
+        }).catch(() => {
+          console.log("Автозапуск заблокирован браузером, нажмите Play в плеере.");
+        });
       };
     });
 
@@ -534,7 +530,7 @@
       audioPlayer.style.display = 'none';
       btnAudioStop.style.display = 'none';
       audioLoading.style.display = 'none';
-      
+
       if (typeof param_targets !== 'undefined') {
         param_targets['speed'] = 0;
         param_targets['scale_all'] = 0;
@@ -543,32 +539,28 @@
 
     function startAudioLoop() {
       isAudioActive = true;
-      function renderAudioFrame() {
+      function processFrame() {
         if (!isAudioActive) return;
-        animationId = requestAnimationFrame(renderAudioFrame);
+        animationId = requestAnimationFrame(processFrame);
         analyser.getByteFrequencyData(audioDataArray);
-        
+
         let sumLow = 0, sumMid = 0, sumHigh = 0;
         for (let i = 0; i < 10; i++) sumLow += audioDataArray[i];
         for (let i = 10; i < 60; i++) sumMid += audioDataArray[i];
         for (let i = 60; i < 128; i++) sumHigh += audioDataArray[i];
 
-        let normLow = (sumLow / 10) / 255;
-        let normMid = (sumMid / 50) / 255;
-        let normHigh = (sumHigh / 68) / 255;
+        let nLow = (sumLow / 10) / 255;
+        let nMid = (sumMid / 50) / 255;
+        let nHigh = (sumHigh / 68) / 255;
 
-        let valLow = parseFloat(sensLow.value);
-        let valMid = parseFloat(sensMid.value);
-        let valHigh = parseFloat(sensHigh.value);
-
-        let totalReaction = (normLow * valLow) + (normMid * valMid) + (normHigh * valHigh);
+        let total = (nLow * parseFloat(sLow.value)) + (nMid * parseFloat(sMid.value)) + (nHigh * parseFloat(sHigh.value));
 
         if (typeof param_targets !== 'undefined') {
-          param_targets['speed'] = totalReaction * 0.8; 
-          param_targets['scale_all'] = (totalReaction * 0.3) - 0.15;
+          param_targets['speed'] = total * 0.8;
+          param_targets['scale_all'] = (total * 0.3) - 0.15;
         }
       }
-      renderAudioFrame();
+      processFrame();
     }
   </script>
 
