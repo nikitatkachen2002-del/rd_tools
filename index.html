@@ -2,7 +2,7 @@
 <html lang="ru">
 <head>
   <meta charset="UTF-8">
-  <title>Reaction-Diffusion Telegram Mini App</title>
+  <title>Reaction-Diffusion Tool - Pure JS & WebAssembly</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <style>
@@ -217,7 +217,7 @@
 
     .tech-layer { position: absolute; left: -9999px; top: -9999px; opacity: 0; pointer-events: none; }
 
-    /* Полноэкранный режим с принудительным растяжением холста */
+    /* Полноэкранный режим на чистом JavaScript и CSS */
     body.is-fullscreen {
       overflow: hidden !important;
       background: #000 !important;
@@ -287,7 +287,7 @@
         <button id="regrow" class="text_button">Regrow</button>
         <button id="reset" class="text_button">Reset</button>
         <button id="example" class="text_button">Example</button>
-        <button id="btn_custom_fullscreen" class="text_button btn-fullscreen">🎥 На весь экран (True Fullscreen)</button>
+        <button id="btn_custom_fullscreen" class="text_button btn-fullscreen">🎥 На весь экран</button>
       </div>
     </div>
 
@@ -401,7 +401,7 @@
     <button id="fullscreen"></button>
   </div>
 
-  <!-- Инициализация Telegram Mini App и принудительный пересчет холста -->
+  <!-- JavaScript-контроллер логики и полноэкранного режима -->
   <script>
     if (window.Telegram && window.Telegram.WebApp) {
         window.Telegram.WebApp.ready();
@@ -412,12 +412,11 @@
     const btnCustomFS = document.getElementById('btn_custom_fullscreen');
     const btnExitFS = document.getElementById('btn_exit_fullscreen');
 
-    let origWidth = canvas.width;
-    let origHeight = canvas.height;
+    let origWidth = canvas.width || 800;
+    let origHeight = canvas.height || 450;
 
     btnCustomFS.addEventListener('click', () => {
       document.body.classList.add('is-fullscreen');
-      // Принудительно задаем холсту разрешение экрана устройства
       canvas.width = window.innerWidth;
       canvas.height = window.innerHeight;
       window.dispatchEvent(new Event('resize'));
@@ -425,7 +424,6 @@
 
     btnExitFS.addEventListener('click', () => {
       document.body.classList.remove('is-fullscreen');
-      // Возвращаем исходное разрешение холста
       canvas.width = origWidth;
       canvas.height = origHeight;
       window.dispatchEvent(new Event('resize'));
@@ -443,11 +441,11 @@
     };
   </script>
 
-  <!-- Подключение скриптов движка симуляции -->
+  <!-- Движок симуляции -->
   <script src="rdtool2.js"></script>
   <script src="rdtool-ems.js"></script>
 
-  <!-- Аудио-реактивность с поддержкой мобильных устройств -->
+  <!-- Аудио-контроллер -->
   <script>
     let audioContext, analyser, source, audioDataArray, animationId;
     let isAudioActive = false;
