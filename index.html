@@ -2,7 +2,7 @@
 <html lang="ru">
 <head>
   <meta charset="UTF-8">
-  <title>RD Tool Telegram Mini App - Ultimate Edition</title>
+  <title>RD Tool Telegram Mini App - Telegram Perfect Fullscreen</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <style>
@@ -26,6 +26,7 @@
       align-items: center;
       overflow-x: hidden;
       width: 100vw;
+      min-height: 100vh;
     }
 
     .app-container {
@@ -231,26 +232,36 @@
       position: absolute; left: -9999px; top: -9999px; opacity: 0; pointer-events: none;
     }
 
-    /* Настоящий полноэкранный режим на весь экран без сжатий */
+    /* АБСОЛЮТНЫЙ ПОЛНОЭКРАННЫЙ РЕЖИМ НА ВЕСЬ ЭКРАН */
     body.is-fullscreen {
       overflow: hidden !important;
       background: #000 !important;
       padding: 0 !important;
+      margin: 0 !important;
     }
     
-    body.is-fullscreen canvas {
+    body.is-fullscreen #canvas_ui_column {
       position: fixed !important;
       top: 0 !important;
       left: 0 !important;
       width: 100vw !important;
       height: 100vh !important;
-      max-width: none !important;
-      max-height: none !important;
       z-index: 99998 !important;
       background: #000 !important;
-      border-radius: 0 !important;
+      display: flex !important;
+      align-items: center !important;
+      justify-content: center !important;
       margin: 0 !important;
       padding: 0 !important;
+    }
+
+    body.is-fullscreen canvas {
+      width: 100vw !important;
+      height: 100vh !important;
+      max-width: none !important;
+      max-height: none !important;
+      border-radius: 0 !important;
+      margin: 0 !important;
       object-fit: cover !important;
     }
 
@@ -408,13 +419,23 @@
   </div>
 
   <script>
-    if (window.Telegram && window.Telegram.WebApp) { window.Telegram.WebApp.expand(); }
+    if (window.Telegram && window.Telegram.WebApp) {
+        window.Telegram.WebApp.ready();
+        window.Telegram.WebApp.expand();
+    }
     
     const btnCustomFS = document.getElementById('btn_custom_fullscreen');
     const btnExitFS = document.getElementById('btn_exit_fullscreen');
 
-    btnCustomFS.addEventListener('click', () => { document.body.classList.add('is-fullscreen'); });
-    btnExitFS.addEventListener('click', () => { document.body.classList.remove('is-fullscreen'); });
+    btnCustomFS.addEventListener('click', () => {
+      document.body.classList.add('is-fullscreen');
+      window.dispatchEvent(new Event('resize'));
+    });
+
+    btnExitFS.addEventListener('click', () => {
+      document.body.classList.remove('is-fullscreen');
+      window.dispatchEvent(new Event('resize'));
+    });
 
     var statusElement = document.getElementById('status');
     var Module = {
