@@ -2,7 +2,7 @@
 <html lang="ru">
 <head>
   <meta charset="UTF-8">
-  <title>RD Tool Telegram Mini App</title>
+  <title>RD Tool Telegram Mini App - Audio Reactive</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <style>
@@ -70,6 +70,9 @@
       font-weight: 600;
       cursor: pointer;
       text-align: center;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
 
     .text_button:active, .pause_paused {
@@ -217,6 +220,7 @@
 <body>
 
   <div class="app-container">
+    <!-- Холст и основные кнопки -->
     <div id="canvas_ui_column">
       <canvas id="canvas"></canvas>
       <div id="canvas_aspect_icon"></div>
@@ -234,6 +238,19 @@
       </div>
     </div>
 
+    <!-- Аудио-реактивность -->
+    <details open>
+      <summary>▼ Аудио-реактивность (Звук)</summary>
+      <div style="display: flex; gap: 8px; margin-bottom: 10px;">
+        <button id="btn_mic" class="text_button" style="flex: 1;">Микрофон</button>
+        <label for="audio_upload" class="text_button" style="flex: 1; margin: 0;">Загрузить файл</label>
+        <input type="file" id="audio_upload" accept="audio/*" style="display: none;">
+      </div>
+      <button id="btn_audio_stop" class="text_button" style="width: 100%; display: none; background: #e84118; border-color: #c23616;">Остановить звук</button>
+      <audio id="audio_player" controls style="width: 100%; margin-top: 10px; display: none; border-radius: 6px;"></audio>
+    </details>
+
+    <!-- Карта узоров -->
     <div id="map_ui_column">
       <h3 style="margin: 5px 0 8px 0; font-size: 15px;">Узоры <kf style="font-size:12px; font-weight:normal; opacity:0.7; margin-left: 10px;"></kf></h3>
       <div id="pattern_map">
@@ -243,93 +260,4 @@
       <div class="icon-grid">
         <button id="kf_radial" class="kf_button" style="background-image:url(https://karlsims.com/rdtool-images/kf-radial.png);"></button>
         <button id="kf_random" class="kf_button" style="background-image:url(https://karlsims.com/rdtool-images/kf-random.png);"></button>
-        <button id="kf_ring" class="kf_button" style="background-image:url(https://karlsims.com/rdtool-images/kf-ring.png);"></button>
-        <button id="kf_horiz" class="kf_button" style="background-image:url(https://karlsims.com/rdtool-images/kf-horiz.png);"></button>
-        <button id="kf_vert" class="kf_button" style="background-image:url(https://karlsims.com/rdtool-images/kf-vert.png);"></button>
-      </div>
-    </div>
-
-    <details open>
-      <summary>▼ Цвета (Color Maps)</summary>
-      <div class="icon-grid">
-        <button id="cm0" class="cm_button cm_button_selected" style="background-image:url(https://karlsims.com/rdtool-images/cm0.png);"></button>
-        <button id="cm1" class="cm_button" style="background-image:url(https://karlsims.com/rdtool-images/cm1.png);"></button>
-        <button id="cm2" class="cm_button" style="background-image:url(https://karlsims.com/rdtool-images/cm2.png);"></button>
-        <button id="cm3" class="cm_button" style="background-image:url(https://karlsims.com/rdtool-images/cm3.png);"></button>
-        <button id="cm4" class="cm_button" style="background-image:url(https://karlsims.com/rdtool-images/cm4.png);"></button>
-        <button id="cm5" class="cm_button" style="background-image:url(https://karlsims.com/rdtool-images/cm5.png);"></button>
-        <button id="cm6" class="cm_button" style="background-image:url(https://karlsims.com/rdtool-images/cm6.png);"></button>
-        <button id="cm7" class="cm_button" style="background-image:url(https://karlsims.com/rdtool-images/cm7.png);"></button>
-        <button id="cm8" class="cm_button" style="background-image:url(https://karlsims.com/rdtool-images/cm8.png);"></button>
-        <button id="cm9" class="cm_button" style="background-image:url(https://karlsims.com/rdtool-images/cm9.png);"></button>
-        <button id="cm10" class="cm_button" style="background-image:url(https://karlsims.com/rdtool-images/cm10.png);"></button>
-        <button id="cm11" class="cm_button" style="background-image:url(https://karlsims.com/rdtool-images/cm11.png);"></button>
-      </div>
-      <div style="margin-top: 8px; display: flex; gap: 8px;">
-        <button id="emboss" class="checkbox checkbox_checked"><div class="checkbox_text">Emboss</div></button>
-        <button id="invert" class="checkbox"><div class="checkbox_text">Invert</div></button>
-      </div>
-      <div style="margin-top: 12px;" id="adjust_colors">
-        <div class="slider" id="hue"><div class="slider_text">Hue</div><div class="slider_track"><div class="slider_zero_tick"></div></div><div class="slider_thumb"></div></div>
-        <div class="slider" id="saturation"><div class="slider_text">Saturation</div><div class="slider_track"><div class="slider_zero_tick"></div></div><div class="slider_thumb"></div></div>
-        <div class="slider" id="brightness"><div class="slider_text">Brightness</div><div class="slider_track"><div class="slider_zero_tick"></div></div><div class="slider_thumb"></div></div>
-        <div class="slider" id="contrast"><div class="slider_text">Contrast</div><div class="slider_track"><div class="slider_zero_tick"></div></div><div class="slider_thumb"></div></div>
-        <div class="slider" id="color_freq"><div class="slider_text">Frequency</div><div class="slider_track"><div class="slider_zero_tick"></div></div><div class="slider_thumb"></div></div>
-        <div class="slider" id="color_phase"><div class="slider_text">Phase</div><div class="slider_track"><div class="slider_zero_tick"></div></div><div class="slider_thumb"></div></div>
-      </div>
-    </details>
-
-    <details open>
-      <summary>▼ Масштаб и Скорость (Scale & Speed)</summary>
-      <div class="slider" id="scale_all"><div class="slider_text">Scale</div><div class="slider_track"><div class="slider_zero_tick"></div></div><div class="slider_thumb"></div></div>
-      <div class="slider" id="scale_radial"><div class="slider_text">Scale Radial</div><div class="slider_track"><div class="slider_zero_tick"></div></div><div class="slider_thumb"></div></div>
-      <div class="slider" id="scale_random"><div class="slider_text">Scale Random</div><div class="slider_track"><div class="slider_zero_tick"></div></div><div class="slider_thumb"></div></div>
-      <div class="slider" id="scale_ring"><div class="slider_text">Scale Ring</div><div class="slider_track"><div class="slider_zero_tick"></div></div><div class="slider_thumb"></div></div>
-      <div class="slider" id="speed"><div class="slider_text">Speed</div><div class="slider_track"><div class="slider_zero_tick"></div></div><div class="slider_thumb"></div></div>
-    </details>
-
-    <details>
-      <summary>▼ Потоки (Flow)</summary>
-      <div class="slider" id="flow_radial"><div class="slider_text">Flow Radial</div><div class="slider_track"><div class="slider_zero_tick"></div></div><div class="slider_thumb"></div></div>
-      <div class="slider" id="flow_rotate"><div class="slider_text">Flow Rotate</div><div class="slider_track"><div class="slider_zero_tick"></div></div><div class="slider_thumb"></div></div>
-      <div class="slider" id="flow_swirl"><div class="slider_text">Flow Swirl</div><div class="slider_track"><div class="slider_zero_tick"></div></div><div class="slider_thumb"></div></div>
-      <div class="slider" id="flow_bubble"><div class="slider_text">Flow Bubble</div><div class="slider_track"><div class="slider_zero_tick"></div></div><div class="slider_thumb"></div></div>
-      <div class="slider" id="flow_ring"><div class="slider_text">Flow Ring</div><div class="slider_track"><div class="slider_zero_tick"></div></div><div class="slider_thumb"></div></div>
-      <div class="slider" id="flow_vortex"><div class="slider_text">Flow Vortex</div><div class="slider_track"><div class="slider_zero_tick"></div></div><div class="slider_thumb"></div></div>
-      <div class="slider" id="flow_vert"><div class="slider_text">Flow Vertical</div><div class="slider_track"><div class="slider_zero_tick"></div></div><div class="slider_thumb"></div></div>
-    </details>
-
-    <details id="orientation">
-      <summary>▼ Ориентация (Orientation)</summary>
-      <div class="slider" id="orientation_radial"><div class="slider_text">Orientation Radial</div><div class="slider_track"><div class="slider_zero_tick"></div></div><div class="slider_thumb"></div></div>
-      <div class="slider" id="orientation_circles"><div class="slider_text">Orientation Circles</div><div class="slider_track"><div class="slider_zero_tick"></div></div><div class="slider_thumb"></div></div>
-      <div class="slider" id="orientation_swirl"><div class="slider_text">Orientation Swirl</div><div class="slider_track"><div class="slider_zero_tick"></div></div><div class="slider_thumb"></div></div>
-      <div class="slider" id="orientation_bubble"><div class="slider_text">Orientation Bubble</div><div class="slider_track"><div class="slider_zero_tick"></div></div><div class="slider_thumb"></div></div>
-      <div class="slider" id="orientation_vert"><div class="slider_text">Orientation Linear</div><div class="slider_track"><div class="slider_zero_tick"></div></div><div class="slider_thumb"></div></div>
-    </details>
-  </div>
-
-  <div style="display:none;"><button id="help_button"></button><button id="fullscreen"></button><debug></debug></div>
-
-  <script>
-    window.Telegram.WebApp.expand();
-    var statusElement = document.getElementById('status');
-    var Module = {
-      print: function(text) { console.log(text); },
-      printErr: function(text) { console.error(text); },
-      setStatus: function(text) { if(statusElement) statusElement.innerHTML = text; },
-      onRuntimeInitialized: function() {
-        console.log("WASM Runtime initialized successfully.");
-        if (typeof init === "function") {
-          init();
-        }
-      }
-    };
-  </script>
-
-  <!-- Строгий порядок подключения: сначала скрипт интерфейса, затем движок -->
-  <script src="rdtool2.js"></script>
-  <script src="rdtool-ems.js"></script>
-
-</body>
-</html>
+        <button id="kf_ring" class="kf_button" style="background-image:
